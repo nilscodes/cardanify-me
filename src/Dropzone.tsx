@@ -92,7 +92,11 @@ export const Dropzone = ({ guidance, buttonText, onSubmitFile, onChangeFile, ...
         ) : (
           <>
             <Square size="10" bg="bg.subtle" borderRadius="lg">
-              <Icon as={FiUploadCloud} boxSize="5" color="fg.muted" />
+              <Icon as={FiUploadCloud} boxSize="5" color="fg.muted" onClick={() => {
+                    if (fileInputRef.current) {
+                      fileInputRef.current.click();
+                    }
+                  }} />
             </Square>
             <VStack spacing="1">
               <HStack spacing="1" whiteSpace="nowrap">

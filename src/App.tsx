@@ -34,7 +34,7 @@ const theme = extendTheme(proTheme, {
     initialColorMode: 'system',
   },
   colors: {
-    brand: {"50":"#FFC42D","100":"#ffc42d","200":"#ffaa34","300":"#ff913b","400":"#ff7842","500":"#ff5f49","600":"#ff4650","700":"#ff2d57","800":"#ff145f","900":"#FF145F"}
+    brand: { "50": "#FFC42D", "100": "#ffc42d", "200": "#ffaa34", "300": "#ff913b", "400": "#ff7842", "500": "#ff5f49", "600": "#ff4650", "700": "#ff2d57", "800": "#ff145f", "900": "#FF145F" }
   },
   fonts: {
     heading: 'Aldrich',
@@ -108,9 +108,19 @@ export const App = () => {
   }
 
   const copyToClipboard = async () => {
-    const res = await fetch(processedImage)
-    const blob = await res.blob();
-    await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+    if (navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') === -1) {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          "image/png": new Promise(async (resolve) => {
+            const response = await fetch(processedImage);
+            resolve(new Blob([await response.blob()], { type: 'image/png' }));
+          })
+        }),
+      ]);
+    } else {
+      const res = await fetch(processedImage);
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": res.blob() })]);
+    }
     setHasCopied(true);
     window.setTimeout(() => setHasCopied(false), 5000);
   };
@@ -125,7 +135,7 @@ export const App = () => {
 
   return (<ChakraProvider theme={theme}>
     <Box textAlign="center" fontSize="xl">
-      <Grid minH="100vh" p={{ base: 1, lg: 3 }} mt={{ base: 2, lg: 12}}>
+      <Grid minH="100vh" p={{ base: 1, lg: 3 }} mt={{ base: 2, lg: 12 }}>
         <VStack spacing={{ base: 4, lg: 8 }} >
           {processedImage && <>
             <Heading fontFamily="Permanent Marker" fontSize='3em' fontWeight='normal'>3. You are cardanified!</Heading>
@@ -136,7 +146,7 @@ export const App = () => {
             </VStack>
             <Stack direction={{ base: 'column', lg: 'row' }}>
               <Button leftIcon={hasCopied ? <FiCheck /> : <FiCopy />} onClick={copyToClipboard}
-              transition="background-color 0.3s">
+                transition="background-color 0.3s">
                 {hasCopied ? 'Copied!' : 'Copy to Clipboard'}
               </Button>
               <Button leftIcon={<FiDownload />} onClick={downloadImage} variant="outline">
