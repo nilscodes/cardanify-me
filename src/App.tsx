@@ -12,6 +12,7 @@ import {
   Image as CImage,
   Button,
   Stack,
+  Text,
 } from "@chakra-ui/react"
 import { theme as proTheme } from '@chakra-ui/pro-theme'
 import { ColorModeSwitcher } from "./ColorModeSwitcher"
@@ -59,7 +60,7 @@ export const App = () => {
   const [hasCopied, setHasCopied] = React.useState(false);
   const initialRef = React.useRef<HTMLInputElement | null>(null);
   const cropRef = React.useRef<HTMLImageElement | null>(null);
-  const [randomLogo, setRandomLogo] = React.useState(`logo512_${Math.floor(Math.random() * 6)}.png`);
+  const [randomLogo] = React.useState(`logo512_${Math.floor(Math.random() * 6)}.png`);
   const [crop, setCrop] = React.useState<Crop>({
     unit: '%',
     width: 100,
@@ -67,12 +68,6 @@ export const App = () => {
     x: 0,
     y: 0
   });
-
-  React.useEffect(() => {
-    document.title = "Cardanify Me"
-    const randomLogoIndex = Math.floor(Math.random() * 6);
-    setRandomLogo(`logo512_${randomLogoIndex}.png`);
-  }, []);
 
   const handleImageChange = (file: File) => {
     const reader = new FileReader();
@@ -114,8 +109,8 @@ export const App = () => {
 
   const copyToClipboard = async () => {
     const res = await fetch(processedImage)
-    const item = new ClipboardItem({ "image/png": res.blob() });
-    navigator.clipboard.write([item]);
+    const blob = await res.blob();
+    await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
     setHasCopied(true);
     window.setTimeout(() => setHasCopied(false), 5000);
   };
@@ -130,12 +125,15 @@ export const App = () => {
 
   return (<ChakraProvider theme={theme}>
     <Box textAlign="center" fontSize="xl">
-      <Grid minH="100vh" p={3} mt={{ base: 2, lg: 12}}>
-        <VStack spacing={8} >
+      <Grid minH="100vh" p={{ base: 1, lg: 3 }} mt={{ base: 2, lg: 12}}>
+        <VStack spacing={{ base: 4, lg: 8 }} >
           {processedImage && <>
             <Heading fontFamily="Permanent Marker" fontSize='3em' fontWeight='normal'>3. You are cardanified!</Heading>
             <CImage src={processedImage} alt="Cardanified" maxW={{ lg: '600px', base: '80vw' }} margin="5" />
-            <Heading fontFamily="Permanent Marker" fontSize='2em' fontWeight='normal'>4. Share!</Heading>
+            <VStack spacing={0}>
+              <Heading fontFamily="Permanent Marker" fontSize='2em' fontWeight='normal'>4. Share!</Heading>
+              <Text color="fg.muted" fontSize="0.75em">Use the hashtag #CardanifyMe</Text>
+            </VStack>
             <Stack direction={{ base: 'column', lg: 'row' }}>
               <Button leftIcon={hasCopied ? <FiCheck /> : <FiCopy />} onClick={copyToClipboard}
               transition="background-color 0.3s">
@@ -150,7 +148,7 @@ export const App = () => {
           </>}
           {!processedImage && <>
             <Heading>Cardanify Me</Heading>
-            <CImage h="40vmin" pointerEvents="none" src={randomLogo} />
+            <CImage h={{ base: '70vmin', lg: '40vmin' }} pointerEvents="none" src={randomLogo} />
             <Container maxW="xl">
               <FormControl id="file">
                 <FormLabel fontFamily="Permanent Marker" fontSize='2em' fontWeight='normal'>1. Upload your file</FormLabel>
